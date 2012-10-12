@@ -60,28 +60,28 @@ perlbench.output = 'attrs.out'
 bzip2 = LiveProcess()
 bzip2_dir = '401.bzip2/'
 bzip2.executable =  bench_dir+bzip2_dir+'/exe/bzip2'
-bzip2.data=bench_dir+bzip2_dir+'data/ref/input/input.source'
-bzip2.cmd = [bzip2.executable] + [bzip2.data, '1']
+data=bench_dir+bzip2_dir+'data/ref/input/input.source'
+bzip2.cmd = [bzip2.executable] + [data, '1']
 bzip2.output = 'input.source.out'
 
 #403.gcc
 gcc = LiveProcess()
 gcc_dir = '403.gcc/'
 gcc.executable =  bench_dir+gcc_dir+'/exe/gcc'
-gcc.data=bench_dir+'/data/ref/input/166.i'
+data=bench_dir+'/data/ref/input/166.i'
 output=output_dir+'/gcc/166.s'
 gcc.cmd = [gcc.executable] + [gcc.data]+['-o',output] + ['-quiet'] + ['-funroll-loops'] + ['-fforce-mem'] + ['-fcse-follow-jumps'] + ['-fcse-skip-blocks'] + ['-fexpensive-optimizations'] + ['-fstrength-reduce'] + ['-fpeephole']  + ['-fschedule-insns'] + ['-finline-functions'] + ['-fschedule-insns2']
 
 #410.bwaves
 bwaves = LiveProcess()
 bwaves.executable =  bench_dir+'/exe/bwaves'
-bwaves.data = bwaves.data
-bwaves.cmd = [bwaves.executable] = [bwaves.data]
+#bwaves.data = bwaves.data
+bwaves.cmd = [bwaves.executable]
 
 #416.gamess
 gamess=LiveProcess()
 gamess_dir='416.gamess/'
-gamess.executable =  bench_dir+gamess-dir+'/exe/gamess'
+gamess.executable =  bench_dir+gamess_dir+'/exe/gamess'
 gamess.cmd = [gamess.executable]
 gamess.input='exam29.config'
 gamess.output='exam29.output'
@@ -90,8 +90,8 @@ gamess.output='exam29.output'
 mcf = LiveProcess()
 mcf_dir = '403.mcf/'
 mcf.executable =  bench_dir+mcf_dir+'/exe/mcf'
-mcf.data=bench_dir+mcf_dir+'/data/ref/input/inp.in'
-mcf.cmd = [mcf.executable] + [mcf.data]
+data=bench_dir+mcf_dir+'/data/ref/input/inp.in'
+mcf.cmd = [mcf.executable] + [data]
 mcf.output = 'inp.out'
 
 #433.milc
@@ -114,21 +114,21 @@ zeusmp.output = 'zeusmp.stdout'
 gromacs = LiveProcess()
 gromacs_dir='435.gromacs/'
 gromacs.executable = bench_dir+gromacs_dir+gromacs_dir+'/exe/gromacs'
-gromacs.data=bench_dir+gromacs_dir+'/data/ref/input/gromacs.tpr'
-gromacs.cmd = [gromacs.executable] + ['-silent','-deffnm',gromacs.data,'-nice','0']
+data=bench_dir+gromacs_dir+'/data/ref/input/gromacs.tpr'
+gromacs.cmd = [gromacs.executable] + ['-silent','-deffnm',data,'-nice','0']
 
 #436.cactusADM
 cactusADM = LiveProcess()
 cactusADM_dir = '436.cactusADM/'
 cactusADM.executable =  bench_dir+cactusADM_dir+'/exe/cactusADM'
-cactusADM.data=data_dir+cactusADM_dir+'/data/ref/input/benchADM.par'
-cactusADM.cmd = [cactusADM.executable] + [cactusADM.data]
+data=bench_dir+cactusADM_dir+'/data/ref/input/benchADM.par'
+cactusADM.cmd = [cactusADM.executable] + [data]
 cactusADM.output = 'benchADM.out'
 
 #437.leslie3d
 leslie3d=LiveProcess()
 leslie3d_dir= '437.leslie3d/'
-leslie3d.executable =  bench_dir+leslie3d_dir+'/exe/leslie3d'
+leslie3d.executable = bench_dir+leslie3d_dir+'/exe/leslie3d'
 stdin=bench_dir+leslie3d_dir+'/data/ref/input/leslie3d.in'
 leslie3d.cmd = [leslie3d.executable]
 leslie3d.input=stdin
@@ -145,7 +145,7 @@ namd.output='namd.stdout'
 #445.gobmk
 gobmk=LiveProcess()
 gobmk_dir = '445.gobmk/'
-gobmk.executable =  bench_dir+gobmk_dir+'/exe/gobmk'
+gobmk.executable = bench_dir+gobmk_dir+'/exe/gobmk'
 stdin=bench_dir+gobmk_dir+'/data/ref/input/13x13.tst'
 gobmk.cmd = [gobmk.executable]+['--quiet','--mode','gtp']
 gobmk.input=stdin
@@ -162,45 +162,45 @@ dealII.output='log'
 soplex=LiveProcess()
 soplex_dir = '450.soplex/'
 soplex.executable = bench_dir+soplex_dir+'/exe/soplex'
-soplex.data=bench_dir+soplex_dir+'/data/ref/input/ref.mps'
-soplex.cmd = [soplex.executable]+['-m10000',soplex.data]
+data=bench_dir+soplex_dir+'/data/ref/input/ref.mps'
+soplex.cmd = [soplex.executable]+['-m10000',data]
 soplex.output = 'test.out'
 
 #453.povray
 povray=LiveProcess()
 povray_dir = '453.povray/'
 povray.executable = bench_dir+povray_dir+'/exe/povray'
-povray.data=bench_dir+povray_dir+'/data/ref/input/SPEC-benchmark-ref.ini'
-povray.cmd = [povray.executable]+[povray.data]
+data=bench_dir+povray_dir+'/data/ref/input/SPEC-benchmark-ref.ini'
+povray.cmd = [povray.executable]+[data]
 povray.output = 'SPEC-benchmark-ref.stdout'
 
 #454.calculix
 calculix=LiveProcess()
 calculix_dir='454.calculix/'
 calculix.executable = bench_dir+calculix_dir+'/exe/calculix'
-calculix.data='/data/ref/input/hyperviscoplastic.inp'
-calculix.cmd = [calculix.executable]+['-i',calculix.data]
+data='/data/ref/input/hyperviscoplastic.inp'
+calculix.cmd = [calculix.executable]+['-i',data]
 calculix.output = 'beampic.log'
 
 #456.hmmer
 hmmer=LiveProcess()
 hmmr_dir = '456.hmmr/'
 hmmer.executable = bench_dir+hmmr_dir+'/exe/hmmer'
-hmmr.data=bench_dir+hmmr+'/data/ref/input/nph3.hmm'
-hmmer.cmd = [hmmer.executable]+['--fixed', '0', '--mean', '325', '--num', '5000', '--sd', '200', '--seed', '0', hmmr.data]
+data=bench_dir+hmmr+'/data/ref/input/nph3.hmm'
+hmmer.cmd = [hmmer.executable]+['--fixed', '0', '--mean', '325', '--num', '5000', '--sd', '200', '--seed', '0', data]
 hmmer.output = 'bombesin.out'
 
 #458.sjeng
 sjeng=LiveProcess()
 sjeng_dir = '458.sjeng/'
 sjeng.executable =  bench_dir+sjeng_dir+'/exe/sjeng'
-sjeng.data=data_dir+sjeng_dir+'/data/ref/input/ref.txt'
-sjeng.cmd = [sjeng.executable]+[sjeng.data]
+data=data_dir+sjeng_dir+'/data/ref/input/ref.txt'
+sjeng.cmd = [sjeng.executable]+[data]
 sjeng.output = 'ref.out'
 
 #459.GemsFDTD
 GemsFDTD=LiveProcess()
-GemsFDTD_dir = '459.GemsFDTD'/
+GemsFDTD_dir = '459.GemsFDTD/'
 GemsFDTD.executable =  bench_dir+GemsFDTD_dir+'/exe/GemsFDTD'
 GemsFDTD.cmd = [GemsFDTD.executable]
 GemsFDTD.output = 'ref.log'
@@ -215,41 +215,41 @@ libquantum.output = 'ref.out'
 #464.h264ref
 h264ref=LiveProcess()
 h264_dir = '464.h264ref/'
-h264ref.executable =  bench_dir+h264_dir+'/exe/h264'
-h264.data=bench_dir+h264_dir+'/data/ref/input/foreman_ref_encoder_baseline.cfg'
-h264ref.cmd = [h264ref.executable]+['-d',h264.data]
+h264ref.executable = bench_dir+h264_dir+'/exe/h264'
+data=bench_dir+h264_dir+'/data/ref/input/foreman_ref_encoder_baseline.cfg'
+h264ref.cmd = [h264ref.executable]+['-d',data]
 h264ref.output = 'foreman_ref_encoder_baseline.out'
 
 #470.lbm
 lbm=LiveProcess()
 lbm_dir='470.lbm/'
 lbm.executable = bench_dir+lbm_dir+'/exe/lbm'
-lbm.data=bench_dir+lbm_dir+'/data/ref/input/100_100_130_ldc.of'
-lbm.cmd = [lbm.executable]+['20', 'reference.dat', '0', '1' ,lbm.data]
+data=bench_dir+lbm_dir+'/data/ref/input/100_100_130_ldc.of'
+lbm.cmd = [lbm.executable]+['20', 'reference.dat', '0', '1' ,data]
 lbm.output = 'lbm.out'
 
 #471.omnetpp
 omnetpp=LiveProcess()
 omnetpp_dir = '471.omnetpp/'
 omnetpp.executable =  bench_dir+omnetpp_dir+'/exe/omnetpp'
-omnetpp.data=bench_dir+omnetpp_dir+'/data/ref/input/omnetpp.ini'
-omnetpp.cmd = [omnetpp.executable]+[omnetpp.data]
+data=bench_dir+omnetpp_dir+'/data/ref/input/omnetpp.ini'
+omnetpp.cmd = [omnetpp.executable]+[data]
 omnetpp.output = 'omnetpp.log'
 
 #473.astar
 astar=LiveProcess()
 astar_dir='473.astar'
 astar.executable = bench_dir+astar_dir+'/exe/astar'
-astar.data=bench_dir+astar_dir+'/data/ref/input/rivers.cfg'
-astar.cmd = [astar.executable]+[astar.data]
+data=bench_dir+astar_dir+'/data/ref/input/rivers.cfg'
+astar.cmd = [astar.executable]+[data]
 astar.output = 'lake.out'
 
 #481.wrf
 wrf=LiveProcess()
 wrf_dir = '481.wrf'
 wrf.executable = bench_dir+wrf_dir+'/exe/wrf'
-wrf.data = bench_dir+wrf_dir+'/data/ref/input/namelist.input'
-wrf.cmd = [wrf.executable]+[wrf.data]
+data = bench_dir+wrf_dir+'/data/ref/input/namelist.input'
+wrf.cmd = [wrf.executable]+[data]
 wrf.output = 'rsl.out.0000'
 
 #482.sphinx
@@ -263,8 +263,8 @@ sphinx3.output = 'an4.out'
 xalancbmk=LiveProcess()
 xalanch_dir = '483.xalancbmk/'
 xalancbmk.executable =  bench_dir+xalanch_dir+'/exe/Xalan'
-xalancbmk.data = bench_dir + xalanch_dir + '/data/ref/input/'
-xalancbmk.cmd = [xalancbmk.executable]+['-v',xalancbmk.data+'t5.xml',xalancbmk.data+'xalanc.xsl']
+data = bench_dir + xalanch_dir + '/data/ref/input/'
+xalancbmk.cmd = [xalancbmk.executable]+['-v',data+'t5.xml',data+'xalanc.xsl']
 xalancbmk.output = 'ref.out'
 
 #998.specrand
