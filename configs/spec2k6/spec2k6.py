@@ -43,10 +43,11 @@ from m5.objects import *
 
 m5.util.addToPath('../common')
 
-bench_dir='/home/min/a/ece565/SPEC2k6/benchspec/CPU2006/'
+bench_dir='/home/min/a/ece565/benchspec/CPU2006/'
 
 ### Note: That some benchmarks require this variable to be modified to match
-### your home environment
+### your home environment. This variable only applies for certain benchmarks
+### that require read/write to an output directory
 output_dir= '/home/min/a/username/outputs/spec2k6/'
 
 #400.perlbench
@@ -70,7 +71,7 @@ gcc_dir = '403.gcc/'
 gcc.executable =  bench_dir+gcc_dir+'/exe/gcc'
 data=bench_dir+'/data/ref/input/166.i'
 output=output_dir+'/gcc/166.s'
-gcc.cmd = [gcc.executable] + [gcc.data]+['-o',output] + ['-quiet'] + ['-funroll-loops'] + ['-fforce-mem'] + ['-fcse-follow-jumps'] + ['-fcse-skip-blocks'] + ['-fexpensive-optimizations'] + ['-fstrength-reduce'] + ['-fpeephole']  + ['-fschedule-insns'] + ['-finline-functions'] + ['-fschedule-insns2']
+gcc.cmd = [gcc.executable] + [data]+['-o',output] + ['-quiet'] + ['-funroll-loops'] + ['-fforce-mem'] + ['-fcse-follow-jumps'] + ['-fcse-skip-blocks'] + ['-fexpensive-optimizations'] + ['-fstrength-reduce'] + ['-fpeephole']  + ['-fschedule-insns'] + ['-finline-functions'] + ['-fschedule-insns2']
 
 #410.bwaves
 bwaves = LiveProcess()
@@ -88,8 +89,8 @@ gamess.output='exam29.output'
 
 #429.mcf
 mcf = LiveProcess()
-mcf_dir = '403.mcf/'
-mcf.executable =  bench_dir+mcf_dir+'/exe/mcf'
+mcf_dir = '429.mcf/'
+mcf.executable = bench_dir+mcf_dir+'/exe/mcf'
 data=bench_dir+mcf_dir+'/data/ref/input/inp.in'
 mcf.cmd = [mcf.executable] + [data]
 mcf.output = 'inp.out'
@@ -186,7 +187,7 @@ calculix.output = 'beampic.log'
 hmmer=LiveProcess()
 hmmr_dir = '456.hmmr/'
 hmmer.executable = bench_dir+hmmr_dir+'/exe/hmmer'
-data=bench_dir+hmmr+'/data/ref/input/nph3.hmm'
+data=bench_dir+hmmr_dir+'/data/ref/input/nph3.hmm'
 hmmer.cmd = [hmmer.executable]+['--fixed', '0', '--mean', '325', '--num', '5000', '--sd', '200', '--seed', '0', data]
 hmmer.output = 'bombesin.out'
 
@@ -194,7 +195,7 @@ hmmer.output = 'bombesin.out'
 sjeng=LiveProcess()
 sjeng_dir = '458.sjeng/'
 sjeng.executable =  bench_dir+sjeng_dir+'/exe/sjeng'
-data=data_dir+sjeng_dir+'/data/ref/input/ref.txt'
+data=bench_dir+sjeng_dir+'/data/ref/input/ref.txt'
 sjeng.cmd = [sjeng.executable]+[data]
 sjeng.output = 'ref.out'
 
@@ -207,7 +208,7 @@ GemsFDTD.output = 'ref.log'
 
 #462.libquantum
 libquantum=LiveProcess()
-libquatum_dir ='462.libquantum/'
+libquantum_dir ='462.libquantum/'
 libquantum.executable = bench_dir+libquantum_dir+'/exe/libquantum'
 libquantum.cmd = [libquantum.executable],'33','5'
 libquantum.output = 'ref.out'
