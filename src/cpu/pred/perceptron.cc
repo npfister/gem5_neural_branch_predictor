@@ -11,12 +11,17 @@ PerceptronBP::PerceptronBP(uint8_t size)
     }
     this->W = new std::vector<uint8_t>();
     this->W.resize(size);
+
+    // fills W with 0's from [begin, end)
+    std::fill(this->W.begin(), this->W.end(), 0);
+    // adds another 0 so that we have a total of size 0's
+    this->W.push_back(0);
     DPRINTF(Perceptron, "Created PerceptronBP");
 }
 
 int8_t getPrediction()
 {
-    /* TODO */
+    /* TODO - this function may require X as an input, depending on how the history register is handled*/
     return 0; 
 }
 
@@ -25,6 +30,11 @@ PerceptronBP::reset()
 {
     this->W.clear();
     this->W.resize(this->size);
+
+    // fills W with 0's from [begin, end)
+    std::fill(this->W.begin(), this->W.end(), 0);
+    // adds another 0 so that we have a total of size 0's
+    this->W.push_back(0);
     DPRINTF(Perceptron, "Reset PerceptronBP");
 }
 
