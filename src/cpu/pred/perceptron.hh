@@ -34,11 +34,12 @@ class PerceptronBP
 
     /**
      * Trains the perceptron branch predictor
-     * @param result actual result of last branch - Taken = 1, not taken = -1
-     * @param y predicted result of branch - Taken = 1, note taken = -1 
-     * @param theta training threshold
+     * @param branch_outcome actual result of last branch - Taken = 1, not taken = -1
+     * @param perceptron_output predicted result of branch - Taken = 1, note taken = -1 
+     * @param training_threshold training threshold
+     * @param X - vector for global branch history
      */
-    void train(int8_t result, int8_t y, int8_t theta);
+    void train(int8_t branch_outcome, int8_t perceptron_output, int8_t training_threshold, std::vector<int8_t>& X);
   private:
     /** W array which stores weights for perceptrion branch predictor */
     uint8_t size;
