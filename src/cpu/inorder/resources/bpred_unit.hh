@@ -44,6 +44,7 @@
 #include "cpu/pred/ras.hh"
 #include "cpu/pred/tournament.hh"
 #include "cpu/pred/gshare.hh"
+#include "cpu/pred/perceptron_top.hh"
 #include "cpu/inst_seq.hh"
 #include "params/InOrderCPU.hh"
 
@@ -58,7 +59,8 @@ class BPredUnit
     enum PredType {
         Local,
         Tournament,
-        Gshare
+        Gshare,
+        Perceptron
     };
 
     PredType predictor;
@@ -242,7 +244,10 @@ class BPredUnit
     TournamentBP *tournamentBP;
 
     /** The gshare branch predictor. */
-    GshareBP *gshareBP;
+    GshareBP *gshareBP; 
+
+    /** The perceptron branch predictor. */
+    PerceptronBP_Top *perceptronBP;
 
     /** The BTB. */
     DefaultBTB BTB;

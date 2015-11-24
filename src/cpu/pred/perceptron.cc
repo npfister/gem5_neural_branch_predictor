@@ -3,6 +3,7 @@
 #include "base/trace.hh"
 #include "cpu/pred/perceptron.hh"
 #include "debug/Perceptron.hh"
+#include <numeric>
 
 PerceptronBP::PerceptronBP(uint8_t size)
 {
@@ -14,15 +15,14 @@ PerceptronBP::PerceptronBP(uint8_t size)
 
     // fills W with 0's from [begin, end)
     std::fill(this->W.begin(), this->W.end(), 0);
-    // adds another 0 so that we have a total of size 0's
-    this->W.push_back(0);
     DPRINTF(Perceptron, "Created PerceptronBP");
 }
 
-int8_t getPrediction()
+int8_t
+PerceptronBP::getPrediction(std::vector<int8_t>& X)
 {
     /* TODO - this function may require X as an input, depending on how the history register is handled*/
-    return 0; 
+    return std::inner_product(X.begin(), X.end(), this->W.begin(), 0); 
 }
 
 void
@@ -33,8 +33,6 @@ PerceptronBP::reset()
 
     // fills W with 0's from [begin, end)
     std::fill(this->W.begin(), this->W.end(), 0);
-    // adds another 0 so that we have a total of size 0's
-    this->W.push_back(0);
     DPRINTF(Perceptron, "Reset PerceptronBP");
 }
 

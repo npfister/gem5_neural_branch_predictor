@@ -25,7 +25,7 @@ class PerceptronBP
      * Computes the dot product of X and W
      * @return A number > 0 implies predict taken
      */
-    int8_t getPrediction(); 
+    int8_t getPrediction(std::vector<int8_t>& X); 
 
     /*
      * Resets the perceptrion's W values
