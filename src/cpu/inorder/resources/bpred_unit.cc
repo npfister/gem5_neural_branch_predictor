@@ -68,6 +68,10 @@ BPredUnit::BPredUnit(Resource *_res, ThePipeline::Params *params)
       gshareBP = new GshareBP(params->globalPredictorSize,
                               params->globalCtrBits);
         predictor = Gshare;
+    } else if (params->predType == "hybridpg"){
+      hybridpgBP = new HybridpgBP(params->globalPredictorSize,
+                                  params->globalCtrBits);
+      predictor = HybridPG;
     } else {
         fatal("Invalid BP selected!");
     }
@@ -412,6 +416,8 @@ BPredUnit::BPSquash(void *bp_history)
         tournamentBP->squash(bp_history);
     } else if (predictor == Gshare) {
         gshareBP->squash(bp_history);
+    } else if (predictor == HybridPG) {
+        hybridpgBP->squash(bp_history);
     } else {
         panic("Predictor type is unexpected value!");
     }    
@@ -427,6 +433,8 @@ BPredUnit::BPLookup(Addr inst_PC, void * &bp_history)
         return tournamentBP->lookup(inst_PC, bp_history);
     } else if (predictor == Gshare) {
         return gshareBP->lookup(inst_PC, bp_history);
+    } else if (predictor == HybridPG) {
+        return hybridpgBP->lookup(inst_PC, bp_history);
     } else {
         panic("Predictor type is unexpected value!");
     }
@@ -442,6 +450,8 @@ BPredUnit::BPUpdate(Addr inst_PC, bool taken, void *bp_history, bool squashed)
         tournamentBP->update(inst_PC, taken, bp_history, squashed);
     } else if (predictor == Gshare) {
         gshareBP->update(inst_PC, taken, bp_history);
+    } else if (predictor == HybridPG) {
+        hybridpgBP->lookup(inst_PC, bp_history);
     } else {
         panic("Predictor type is unexpected value!");
         //cout << "Got predictor: " << predictor << " Gshare is " << Gshare << "\n";

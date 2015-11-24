@@ -1,40 +1,14 @@
 /*
- * Copyright (c) 2004-2006 The Regents of The University of Michigan
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met: redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer;
- * redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution;
- * neither the name of the copyright holders nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  * Authors: John Skubic
  */
 
 #include "base/intmath.hh"
 #include "base/misc.hh"
 #include "base/trace.hh"
-#include "cpu/pred/gshare.hh"
+#include "cpu/pred/hybrid_pg.hh"
 #include "debug/Fetch.hh"
 
-GshareBP::GshareBP(unsigned _globalPredictorSize,
+HybridpgBP::HybridpgBP(unsigned _globalPredictorSize,
                  unsigned _globalCtrBits)
     : globalPredictorSize(_globalPredictorSize),
       globalCtrBits(_globalCtrBits)
@@ -71,7 +45,7 @@ GshareBP::GshareBP(unsigned _globalPredictorSize,
 }
 
 void
-GshareBP::reset()
+HybridpgBP::reset()
 {
     for (unsigned i = 0; i < globalPredictorSets; ++i) {
         globalCtrs[i].reset();
@@ -79,7 +53,7 @@ GshareBP::reset()
 }
 
 void
-GshareBP::BTBUpdate(Addr &branch_addr, void * &bp_history)
+HybridpgBP::BTBUpdate(Addr &branch_addr, void * &bp_history)
 {
 // Called to update predictor history when
 // a BTB entry is invalid or not found.
@@ -89,7 +63,7 @@ GshareBP::BTBUpdate(Addr &branch_addr, void * &bp_history)
 
 
 bool
-GshareBP::lookup(Addr &branch_addr, void * &bp_history)
+HybridpgBP::lookup(Addr &branch_addr, void * &bp_history)
 {
     bool taken;
     uint8_t counter_val;
@@ -121,7 +95,7 @@ GshareBP::lookup(Addr &branch_addr, void * &bp_history)
 }
 
 void
-GshareBP::update(Addr &branch_addr, bool taken, void *bp_history)
+HybridpgBP::update(Addr &branch_addr, bool taken, void *bp_history)
 {
     assert(bp_history == NULL);
     unsigned global_predictor_idx;
@@ -151,7 +125,7 @@ GshareBP::update(Addr &branch_addr, bool taken, void *bp_history)
 
 inline
 bool
-GshareBP::getPrediction(uint8_t &count)
+HybridpgBP::getPrediction(uint8_t &count)
 {
     // Get the MSB of the count
     return (count >> (globalCtrBits - 1));
@@ -159,7 +133,7 @@ GshareBP::getPrediction(uint8_t &count)
 
 inline
 unsigned
-GshareBP::getGlobalIndex(Addr &branch_addr)
+HybridpgBP::getGlobalIndex(Addr &branch_addr)
 {
     return ((branch_addr ^ globalHistory) & globalHistoryMask);
 }
