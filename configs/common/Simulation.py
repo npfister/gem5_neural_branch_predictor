@@ -295,6 +295,10 @@ def run(options, root, testsys, cpu_class):
         for i in xrange(np):
             testsys.cpu[i].max_insts_any_thread = options.maxinsts
 
+    if options.pred_type:
+        for i in xrange(np):
+            testsys.cpu[i].predType = options.pred_type
+
     if cpu_class:
         switch_cpus = [cpu_class(defer_registration=True, cpu_id=(i))
                        for i in xrange(np)]

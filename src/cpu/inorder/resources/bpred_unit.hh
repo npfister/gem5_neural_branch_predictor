@@ -43,6 +43,7 @@
 #include "cpu/pred/btb.hh"
 #include "cpu/pred/ras.hh"
 #include "cpu/pred/tournament.hh"
+#include "cpu/pred/gshare.hh"
 #include "cpu/inst_seq.hh"
 #include "params/InOrderCPU.hh"
 
@@ -56,7 +57,8 @@ class BPredUnit
 
     enum PredType {
         Local,
-        Tournament
+        Tournament,
+        Gshare
     };
 
     PredType predictor;
@@ -238,6 +240,9 @@ class BPredUnit
 
     /** The tournament branch predictor. */
     TournamentBP *tournamentBP;
+
+    /** The gshare branch predictor. */
+    GshareBP *gshareBP;
 
     /** The BTB. */
     DefaultBTB BTB;
