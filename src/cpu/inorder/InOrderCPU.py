@@ -45,7 +45,7 @@ class InOrderCPU(BaseCPU):
     fetchBuffSize = Param.Unsigned(4, "Fetch Buffer Size (Number of Cache Blocks Stored)")
     memBlockSize = Param.Unsigned(64, "Memory Block Size")
 
-    predType = Param.String("tournament", "Branch predictor type ('local', 'tournament')")
+    predType = Param.String("tournament", "Branch predictor type ('local', 'tournament', 'gshare')")
     localPredictorSize = Param.Unsigned(2048, "Size of local predictor")
     localCtrBits = Param.Unsigned(2, "Bits per counter")
     localHistoryTableSize = Param.Unsigned(2048, "Size of local history table")
