@@ -9,8 +9,8 @@ PerceptronBP::PerceptronBP(uint8_t size)
     if (!size) {
       fatal("PerceptronBP must have size > 0");
     }
-    this->W = new std::vector<uint8_t>();
     this->W.resize(size);
+    this->size = size;
 
     // fills W with 0's from [begin, end)
     std::fill(this->W.begin(), this->W.end(), 0);

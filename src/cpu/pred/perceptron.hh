@@ -41,6 +41,7 @@ class PerceptronBP
     void train(int8_t result, int8_t y, int8_t theta);
   private:
     /** W array which stores weights for perceptrion branch predictor */
+    uint8_t size;
     std::vector<int8_t> W;
 };
 
