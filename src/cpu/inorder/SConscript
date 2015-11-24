@@ -56,12 +56,13 @@ if 'InOrderCPU' in env['CPU_MODELS']:
         DebugFlag('RefCount')
         DebugFlag('AddrDep')
         DebugFlag('SkedCache')
+        DebugFlag('Perceptron')
 
         CompoundFlag('InOrderCPUAll', [ 'InOrderStage', 'InOrderStall', 'InOrderCPU',
                'InOrderMDU', 'InOrderAGEN', 'InOrderFetchSeq', 'InOrderTLB', 'InOrderBPred',
                'InOrderDecode', 'InOrderExecute', 'InOrderInstBuffer', 'InOrderUseDef',
                'InOrderGraduation', 'InOrderCachePort', 'RegDepMap', 'Resource',
-               'InOrderStall','ThreadModel', 'AddrDep'])
+               'InOrderStall','ThreadModel', 'AddrDep', 'Perceptron'])
 
         Source('inorder_dyn_inst.cc')
         Source('inorder_cpu_builder.cc')
