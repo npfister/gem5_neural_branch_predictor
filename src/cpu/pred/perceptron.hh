@@ -41,6 +41,8 @@ class PerceptronBP
      */
     void train(int8_t branch_outcome, int8_t perceptron_output, int8_t training_threshold, std::vector<int8_t>& X);
   private:
+    inline int8_t changeToPlusMinusOne(int8_t input);
+
     /** W array which stores weights for perceptrion branch predictor */
     uint8_t size;
     std::vector<int8_t> W;
