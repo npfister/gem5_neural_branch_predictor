@@ -61,10 +61,10 @@ PerceptronBP_Top::update(Addr &branch_addr, bool taken, void *bp_history)
 
 	PerceptronBP* curr_perceptron = this->perceptronTable[ (branch_addr >> 2) & this->globalHistoryMask];
 
-	this->X.insert(this->X.begin() + 1, (taken > 0) ? 1 : -1);
+	this->X.insert(this->X.begin() + 1, this->changeToPlusMinusOne((int8_t)taken));
 	this->X.pop_back();
 
-	curr_perceptron->train((int8_t)((taken > 0) ? 1 : -1), static_cast<BPHistory *>(bp_history)->perceptron_y, this->theta, this->X);
+	curr_perceptron->train(this->changeToPlusMinusOne((int8_t)taken), static_cast<BPHistory *>(bp_history)->perceptron_y, this->theta, this->X);
 
 }
 
@@ -83,4 +83,10 @@ void
 PerceptronBP_Top::reset()
 {
 
+}
+
+inline int8_t
+PerceptronBP_Top::changeToPlusMinusOne(int8_t input)
+{
+  return (input >= 0) ? 1 : -1;
 }

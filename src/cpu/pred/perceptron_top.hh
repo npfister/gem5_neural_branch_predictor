@@ -58,6 +58,7 @@ class PerceptronBP_Top
     void reset();
 
   private:
+    inline int8_t changeToPlusMinusOne(int8_t input);
 
     /** Calculates the global index based on the PC. */
     inline unsigned getGlobalIndex(Addr &PC);
