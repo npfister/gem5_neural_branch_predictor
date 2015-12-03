@@ -1,14 +1,15 @@
 /*
- * Authors: John Skubic
- */
+* Authors: Alex Ionescu, Nick Pfister
+*/
 
-#ifndef __CPU_O3_GSHARE_PRED_HH__
-#define __CPU_O3_GSHARE_PRED_HH__
+#ifndef __CPU_O3_PERCEPTRON_TOP_PRED_HH__
+#define __CPU_O3_PERCEPTRON_TOP_PRED_HH__
 
 #include <vector>
 
 #include "base/types.hh"
 #include "cpu/o3/sat_counter.hh"
+#include "cpu/pred/perceptron.hh"
 
 /**
  * Implements a global predictor that uses the PC to index into a table of
@@ -17,16 +18,15 @@
  * predictor state that needs to be recorded or updated; the update can be
  * determined solely by the branch being taken or not taken.
  */
-class GshareBP
+class PerceptronBP_Top
 {
   public:
     /**
      * Default branch predictor constructor.
-     * @param globalPredictorSize Size of the global predictor.
-     * @param globalCtrBits Number of bits per counter.
-     * @param instShiftAmt Offset amount for instructions to ignore alignment.
+     * @param globalPredictorSize number of perceptrons.
+     * @param globalHistBits Number of bits in global history register.
      */
-    GshareBP(unsigned globalPredictorSize, unsigned globalCtrBits);
+    PerceptronBP_Top(unsigned globalPredictorSize, unsigned globalHistBits, int8_t theta);
 
     /**
      * Looks up the given address in the branch predictor and returns
@@ -34,7 +34,7 @@ class GshareBP
      * @param branch_addr The address of the branch to look up.
      * @param bp_history Pointer to any bp history state.
      * @return Whether or not the branch is taken.
-     */
+     */                             //NULL
     bool lookup(Addr &branch_addr, void * &bp_history);
 
     /**
@@ -53,42 +53,40 @@ class GshareBP
      */
     void update(Addr &branch_addr, bool taken, void *bp_history);
 
-    void squash(void *bp_history)
-    { assert(bp_history == NULL); }
+    void uncondBr(void * &bp_history);
+
+    void squash(void *bp_history);
 
     void reset();
 
   private:
-    /**
-     *  Returns the taken/not taken prediction given the value of the
-     *  counter.
-     *  @param count The value of the counter.
-     *  @return The prediction based on the counter value.
-     */
-    inline bool getPrediction(uint8_t &count);
+    inline int8_t changeToPlusMinusOne(int8_t input);
 
     /** Calculates the global index based on the PC. */
     inline unsigned getGlobalIndex(Addr &PC);
 
     /** Array of counters that make up the global predictor. */
-    std::vector<SatCounter> globalCtrs;
+    std::vector<PerceptronBP*> perceptronTable;
 
     /** Size of the global predictor. */
     unsigned globalPredictorSize;
 
-    /** Number of sets. */
-    unsigned globalPredictorSets;
-
     /** Number of bits of the global predictor's counters. */
-    unsigned globalCtrBits;
+    unsigned globalHistBits;
 
     /** Mask to get the proper global history. */
-    unsigned globalHistoryMask;
+    unsigned long globalHistoryMask;
 
     /** Global history register. */
-    unsigned globalHistory;    
+    std::vector<int8_t> X;
 
+    /** Training constraint */
+    int8_t theta;
+
+    struct BPHistory {
+        int8_t perceptron_y;
+	};
 
 };
 
-#endif // __CPU_O3_GSHARE_PRED_HH__
+#endif

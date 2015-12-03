@@ -38,4 +38,5 @@ if 'InOrderCPU' in env['CPU_MODELS'] or 'O3CPU' in env['CPU_MODELS']:
     Source('perceptron.cc')
     Source('gshare.cc')
     Source('hybrid_pg.cc')
+    Source('perceptron_top.cc')
     DebugFlag('FreeList')

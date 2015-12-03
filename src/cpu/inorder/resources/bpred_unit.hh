@@ -45,6 +45,7 @@
 #include "cpu/pred/tournament.hh"
 #include "cpu/pred/gshare.hh"
 #include "cpu/pred/hybrid_pg.hh"
+#include "cpu/pred/perceptron_top.hh"
 #include "cpu/inst_seq.hh"
 #include "params/InOrderCPU.hh"
 
@@ -60,7 +61,8 @@ class BPredUnit
         Local,
         Tournament,
         Gshare,
-	      HybridPG
+        HybridPG,
+        Perceptron
     };
 
     PredType predictor;
@@ -244,7 +246,10 @@ class BPredUnit
     TournamentBP *tournamentBP;
 
     /** The gshare branch predictor. */
-    GshareBP *gshareBP;
+    GshareBP *gshareBP; 
+
+    /** The perceptron branch predictor. */
+    PerceptronBP_Top *perceptronBP;
 
     /** The hybrid gshare / perceptron branch predictor. */
     HybridpgBP *hybridpgBP;

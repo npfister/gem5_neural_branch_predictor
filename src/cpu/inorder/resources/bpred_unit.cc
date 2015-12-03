@@ -72,6 +72,11 @@ BPredUnit::BPredUnit(Resource *_res, ThePipeline::Params *params)
       hybridpgBP = new HybridpgBP(params->globalPredictorSize,
                                   params->globalCtrBits);
       predictor = HybridPG;
+    } else if (params->predType == "perceptron") {
+      perceptronBP = new PerceptronBP_Top(params->globalPredictorSize,
+                              params->globalHistoryBits,
+                              2 * params->globalHistoryBits + 14);
+      predictor = Perceptron;
     } else {
         fatal("Invalid BP selected!");
     }
@@ -403,7 +408,10 @@ BPredUnit::BPUncond(void * &bp_history)
     // Only the tournament predictor cares about unconditional branches.
     if (predictor == Tournament) {
         tournamentBP->uncondBr(bp_history);
-    }    
+    } else if (predictor == Perceptron) {
+        perceptronBP->uncondBr(bp_history);
+    }
+       
 }
 
 
@@ -418,6 +426,8 @@ BPredUnit::BPSquash(void *bp_history)
         gshareBP->squash(bp_history);
     } else if (predictor == HybridPG) {
         hybridpgBP->squash(bp_history);
+    } else if (predictor == Perceptron) {
+        perceptronBP->squash(bp_history);
     } else {
         panic("Predictor type is unexpected value!");
     }    
@@ -435,6 +445,8 @@ BPredUnit::BPLookup(Addr inst_PC, void * &bp_history)
         return gshareBP->lookup(inst_PC, bp_history);
     } else if (predictor == HybridPG) {
         return hybridpgBP->lookup(inst_PC, bp_history);
+    } else if (predictor == Perceptron) {
+        return perceptronBP->lookup(inst_PC, bp_history);
     } else {
         panic("Predictor type is unexpected value!");
     }
@@ -452,6 +464,8 @@ BPredUnit::BPUpdate(Addr inst_PC, bool taken, void *bp_history, bool squashed)
         gshareBP->update(inst_PC, taken, bp_history);
     } else if (predictor == HybridPG) {
         hybridpgBP->lookup(inst_PC, bp_history);
+    } else if (predictor == Perceptron) {
+        perceptronBP->update(inst_PC, taken, bp_history);
     } else {
         panic("Predictor type is unexpected value!");
         //cout << "Got predictor: " << predictor << " Gshare is " << Gshare << "\n";

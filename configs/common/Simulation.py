@@ -299,6 +299,10 @@ def run(options, root, testsys, cpu_class):
         for i in xrange(np):
             testsys.cpu[i].predType = options.pred_type
 
+    if options.global_hist_size:	
+	      for i in xrange(np):
+		        testsys.cpu[i].globalHistoryBits = options.global_hist_size
+
     if cpu_class:
         switch_cpus = [cpu_class(defer_registration=True, cpu_id=(i))
                        for i in xrange(np)]
