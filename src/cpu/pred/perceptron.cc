@@ -15,7 +15,6 @@ PerceptronBP::PerceptronBP(uint8_t size)
 
     // fills W with 0's from [begin, end)
     std::fill(this->W.begin(), this->W.end(), 0);
-    DPRINTF(Perceptron, "Created PerceptronBP");
 }
 
 int8_t
@@ -40,6 +39,7 @@ PerceptronBP::reset()
 void 
 PerceptronBP::train(int8_t branch_outcome, int8_t perceptron_output, int8_t training_threshold, std::vector<int8_t> &X)
 {
+    DPRINTF(Perceptron, "Perceptron train entered\n");
     if (this->changeToPlusMinusOne(perceptron_output) != branch_outcome || abs(perceptron_output)<=training_threshold) {//incorrect perceptron prediction. Upgrade the perceptron predictor
         for(int i=0; i< this->W.size(); i++) {
             W[i]= W[i]+ (this->changeToPlusMinusOne(perceptron_output)) * X[i]; //Increase or decrease weight vectors

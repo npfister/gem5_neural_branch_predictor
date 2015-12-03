@@ -68,6 +68,11 @@ BPredUnit::BPredUnit(Resource *_res, ThePipeline::Params *params)
       gshareBP = new GshareBP(params->globalPredictorSize,
                               params->globalCtrBits);
         predictor = Gshare;
+    } else if (params->predType == "perceptron") {
+      perceptronBP = new PerceptronBP_Top(params->globalPredictorSize,
+                              params->globalHistoryBits,
+                              2 * params->globalHistoryBits + 14);
+      predictor = Perceptron;
     } else {
         fatal("Invalid BP selected!");
     }
@@ -399,7 +404,10 @@ BPredUnit::BPUncond(void * &bp_history)
     // Only the tournament predictor cares about unconditional branches.
     if (predictor == Tournament) {
         tournamentBP->uncondBr(bp_history);
-    }    
+    } else if (predictor == Perceptron) {
+        perceptronBP->uncondBr(bp_history);
+    }
+       
 }
 
 

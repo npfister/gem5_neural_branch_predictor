@@ -53,6 +53,8 @@ class PerceptronBP_Top
      */
     void update(Addr &branch_addr, bool taken, void *bp_history);
 
+    void uncondBr(void * &bp_history);
+
     void squash(void *bp_history);
 
     void reset();
