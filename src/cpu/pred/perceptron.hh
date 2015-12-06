@@ -19,13 +19,13 @@ class PerceptronBP
      * Default branch predictor constructor.
      * @param size How many elements the W vector should be. Must be >= 1
      */
-    PerceptronBP(uint8_t size);
+    PerceptronBP(uint32_t size, uint32_t theta);
 
     /**
      * Computes the dot product of X and W
      * @return A number > 0 implies predict taken
      */
-    int8_t getPrediction(std::vector<int8_t>& X); 
+    int32_t getPrediction(std::vector<int8_t>& X); 
 
     /*
      * Resets the perceptrion's W values
@@ -39,13 +39,14 @@ class PerceptronBP
      * @param training_threshold training threshold
      * @param X - vector for global branch history
      */
-    void train(int8_t branch_outcome, int8_t perceptron_output, int8_t training_threshold, std::vector<int8_t>& X);
+    void train(int8_t branch_outcome, int32_t perceptron_output, int32_t training_threshold, std::vector<int8_t>& X);
   private:
-    inline int8_t changeToPlusMinusOne(int8_t input);
+    inline int8_t changeToPlusMinusOne(int32_t input);
 
     /** W array which stores weights for perceptrion branch predictor */
-    uint8_t size;
-    std::vector<int8_t> W;
+    uint32_t size;
+    uint32_t theta;
+    std::vector<int32_t> W;
 };
 
 #endif // __CPU_O3_PERCEPTRON_LOCAL_PRED_HH__

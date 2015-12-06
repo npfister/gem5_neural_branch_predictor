@@ -26,7 +26,7 @@ class PerceptronBP_Top
      * @param globalPredictorSize number of perceptrons.
      * @param globalHistBits Number of bits in global history register.
      */
-    PerceptronBP_Top(unsigned globalPredictorSize, unsigned globalHistBits, int8_t theta);
+    PerceptronBP_Top(unsigned globalPredictorSize, unsigned globalHistBits, int32_t theta);
 
     /**
      * Looks up the given address in the branch predictor and returns
@@ -60,7 +60,7 @@ class PerceptronBP_Top
     void reset();
 
   private:
-    inline int8_t changeToPlusMinusOne(int8_t input);
+    inline int8_t changeToPlusMinusOne(int32_t input);
 
     /** Calculates the global index based on the PC. */
     inline unsigned getGlobalIndex(Addr &PC);
@@ -83,8 +83,10 @@ class PerceptronBP_Top
     /** Training constraint */
     int8_t theta;
 
+    long long int missCount;
+
     struct BPHistory {
-        int8_t perceptron_y;
+        int32_t perceptron_y;
 	};
 
 };

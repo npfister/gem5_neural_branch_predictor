@@ -32,6 +32,7 @@
 #include "base/trace.hh"
 #include "cpu/pred/btb.hh"
 #include "debug/Fetch.hh"
+#include "debug/InOrderBPred.hh"
 
 DefaultBTB::DefaultBTB(unsigned _numEntries,
                        unsigned _tagBits,
@@ -108,6 +109,7 @@ DefaultBTB::lookup(Addr instPC, ThreadID tid)
 {
     unsigned btb_idx = getIndex(instPC);
 
+    DPRINTF(InOrderBPred, "BTB Lookup %x\n" , instPC);
     Addr inst_tag = getTag(instPC);
 
     assert(btb_idx < numEntries);
@@ -127,6 +129,8 @@ DefaultBTB::update(Addr instPC, const TheISA::PCState &target, ThreadID tid)
     unsigned btb_idx = getIndex(instPC);
 
     assert(btb_idx < numEntries);
+
+    DPRINTF(InOrderBPred, "BTB Update %x\n" , instPC);
 
     btb[btb_idx].tid = tid;
     btb[btb_idx].valid = true;

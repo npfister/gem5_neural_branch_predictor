@@ -4,20 +4,22 @@
 #include "cpu/pred/perceptron.hh"
 #include "debug/Perceptron.hh"
 #include <numeric>
+#include <string>
 
-PerceptronBP::PerceptronBP(uint8_t size)
+PerceptronBP::PerceptronBP(uint32_t size, uint32_t theta)
 {
     if (!size) {
       fatal("PerceptronBP must have size > 0");
     }
     this->W.resize(size);
     this->size = size;
+    this->theta = theta;
 
     // fills W with 0's from [begin, end)
     std::fill(this->W.begin(), this->W.end(), 0);
 }
 
-int8_t
+int32_t
 PerceptronBP::getPrediction(std::vector<int8_t>& X)
 {
     /* TODO - this function may require X as an input, depending on how the history register is handled*/
@@ -37,18 +39,30 @@ PerceptronBP::reset()
 
 
 void 
-PerceptronBP::train(int8_t branch_outcome, int8_t perceptron_output, int8_t training_threshold, std::vector<int8_t> &X)
+PerceptronBP::train(int8_t branch_outcome, int32_t perceptron_output, int32_t training_threshold, std::vector<int8_t> &X)
 {
+    std::string s = "W: ";
     DPRINTF(Perceptron, "Perceptron train entered\n");
     if (this->changeToPlusMinusOne(perceptron_output) != branch_outcome || abs(perceptron_output)<=training_threshold) {//incorrect perceptron prediction. Upgrade the perceptron predictor
         for(int i=0; i< this->W.size(); i++) {
             W[i]= W[i]+ (this->changeToPlusMinusOne(perceptron_output)) * X[i]; //Increase or decrease weight vectors
+           /* if(abs(W[i]) > this->theta){
+              if (W[i] < 0){
+                W[i] = theta * -1;
+              }
+              else{
+                W[i] = theta;
+              }
+            }*/
+            s.append(std::to_string((long long int)W[i]));
+            s.append(", ");
         }
     }
+    DPRINTF(Perceptron, "%s\n", s);
 }
 
 inline int8_t
-PerceptronBP::changeToPlusMinusOne(int8_t input)
+PerceptronBP::changeToPlusMinusOne(int32_t input)
 {
   return (input >= 0) ? 1 : -1;
 }

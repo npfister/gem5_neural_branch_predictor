@@ -56,8 +56,8 @@ class InOrderCPU(BaseCPU):
     choicePredictorSize = Param.Unsigned(8192, "Size of choice predictor")
     choiceCtrBits = Param.Unsigned(2, "Bits of choice counters")
 
-    BTBEntries = Param.Unsigned(4096, "Number of BTB entries")
-    BTBTagSize = Param.Unsigned(16, "Size of the BTB tags, in bits")
+    BTBEntries = Param.Unsigned(16384, "Number of BTB entries")
+    BTBTagSize = Param.Unsigned(15, "Size of the BTB tags, in bits")
 
     RASSize = Param.Unsigned(16, "RAS size")
 
