@@ -98,7 +98,6 @@ HybridpgBP::lookup(Addr &branch_addr, void * &bp_history)
 {
     bool taken;
     //idx is xor of branch addr and globalHistory
-    unsigned global_predictor_idx = getGlobalIndex(branch_addr);
 	  PerceptronBP* curr_perceptron = this->perceptronTable[ getGlobalIndex(branch_addr)];
 	  BPHistory *history = new BPHistory;
 	  history->perceptron_y = curr_perceptron->getPrediction(this->X);
