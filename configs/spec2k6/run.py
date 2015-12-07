@@ -74,6 +74,9 @@ parser.add_option("-b", "--benchmark", default="",
                  help="The benchmark to be loaded.")
 
 parser.add_option("", "--pred-type", default="local")
+parser.add_option("", "--global-hist-size", default=13)
+parser.add_option("", "--global-pred-size", default=8192)
+parser.add_option("", "--local-pred-size", default=8192)
 
 (options, args) = parser.parse_args()
 

@@ -66,8 +66,19 @@ BPredUnit::BPredUnit(Resource *_res, ThePipeline::Params *params)
         predictor = Tournament;
     } else if (params->predType == "gshare") {
       gshareBP = new GshareBP(params->globalPredictorSize,
-                              params->globalCtrBits);
+                              params->globalCtrBits,
+                              params->globalHistoryBits);
         predictor = Gshare;
+    } else if (params->predType == "hybridpg"){
+      hybridBP = new HybridpgBP(params->globalPredictorSize,
+                                  params->globalHistoryBits,
+				                          2 * params->globalHistoryBits + 14);
+      predictor = HybridPG;
+    } else if (params->predType == "perceptron") {
+      perceptronBP = new PerceptronBP_Top(params->globalPredictorSize,
+                              params->globalHistoryBits,
+                              2 * params->globalHistoryBits + 14);
+      predictor = Perceptron;
     } else {
         fatal("Invalid BP selected!");
     }
@@ -399,7 +410,10 @@ BPredUnit::BPUncond(void * &bp_history)
     // Only the tournament predictor cares about unconditional branches.
     if (predictor == Tournament) {
         tournamentBP->uncondBr(bp_history);
-    }    
+    } else if (predictor == Perceptron) {
+        perceptronBP->uncondBr(bp_history);
+    }
+       
 }
 
 
@@ -412,6 +426,8 @@ BPredUnit::BPSquash(void *bp_history)
         tournamentBP->squash(bp_history);
     } else if (predictor == Gshare) {
         gshareBP->squash(bp_history);
+    } else if (predictor == HybridPG) {
+        hybridBP->squash(bp_history);
     } else if (predictor == Perceptron) {
         perceptronBP->squash(bp_history);
     } else {
@@ -429,6 +445,8 @@ BPredUnit::BPLookup(Addr inst_PC, void * &bp_history)
         return tournamentBP->lookup(inst_PC, bp_history);
     } else if (predictor == Gshare) {
         return gshareBP->lookup(inst_PC, bp_history);
+    } else if (predictor == HybridPG) {
+        return hybridBP->lookup(inst_PC, bp_history);
     } else if (predictor == Perceptron) {
         return perceptronBP->lookup(inst_PC, bp_history);
     } else {
@@ -446,6 +464,8 @@ BPredUnit::BPUpdate(Addr inst_PC, bool taken, void *bp_history, bool squashed)
         tournamentBP->update(inst_PC, taken, bp_history, squashed);
     } else if (predictor == Gshare) {
         gshareBP->update(inst_PC, taken, bp_history);
+    } else if (predictor == HybridPG) {
+        hybridBP->lookup(inst_PC, bp_history);
     } else if (predictor == Perceptron) {
         perceptronBP->update(inst_PC, taken, bp_history);
     } else {

@@ -26,7 +26,7 @@ class GshareBP
      * @param globalCtrBits Number of bits per counter.
      * @param instShiftAmt Offset amount for instructions to ignore alignment.
      */
-    GshareBP(unsigned globalPredictorSize, unsigned globalCtrBits);
+    GshareBP(unsigned globalPredictorSize, unsigned globalCtrBits, unsigned globalHistoryLen);
 
     /**
      * Looks up the given address in the branch predictor and returns
@@ -88,6 +88,9 @@ class GshareBP
     /** Global history register. */
     unsigned globalHistory;    
 
+    unsigned globalHistoryLen;
+
+    unsigned indexMask;
 
 };
 

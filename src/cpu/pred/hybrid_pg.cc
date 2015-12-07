@@ -31,21 +31,23 @@
 #include "base/intmath.hh"
 #include "base/misc.hh"
 #include "base/trace.hh"
-#include "cpu/pred/gshare.hh"
+#include "cpu/pred/hybrid_pg.hh"
 #include "debug/Fetch.hh"
+#include "cpu/pred/perceptron.hh"
 
-GshareBP::GshareBP(unsigned _globalPredictorSize,
-                  unsigned _globalCtrBits,
-                  unsigned _globalHistoryLen)
+
+HybridpgBP::HybridpgBP(unsigned _globalPredictorSize,
+                  unsigned _globalHistoryLen,
+                  int32_t _theta)
     : globalPredictorSize(_globalPredictorSize),
-      globalCtrBits(_globalCtrBits),
-      globalHistoryLen(_globalHistoryLen)
+      globalHistoryLen(_globalHistoryLen),
+      theta(_theta)
 {
     if (!isPowerOf2(globalPredictorSize)) {
         fatal("Invalid global predictor size!\n");
     }
 
-    globalPredictorSets = globalPredictorSize / globalCtrBits;
+    globalPredictorSets = floorPow2(globalPredictorSize / (_globalHistoryLen * ceilLog2(theta)));
 
     if (!isPowerOf2(globalPredictorSets)) {
         fatal("Invalid number of global predictor sets! Check globalCtrBits.\n");
@@ -62,37 +64,27 @@ GshareBP::GshareBP(unsigned _globalPredictorSize,
 
     indexMask = globalPredictorSets-1;
 
+	  this->X.push_back(1);
+	  for(int i=1;i < _globalHistoryLen; i++) { //
+		  this->X.push_back(-1);
+	  }
 
     // Setup the array of counters for the global predictor.
-    globalCtrs.resize(globalPredictorSets);
-
     for (unsigned i = 0; i < globalPredictorSets; ++i)
-        globalCtrs[i].setBits(_globalCtrBits);
+      this->perceptronTable.push_back(new PerceptronBP(_globalHistoryLen, theta));
 
-    DPRINTF(Fetch, "Branch predictor: ghsare predictor size: %i\n",
-            globalPredictorSize);
-
-    DPRINTF(Fetch, "Branch predictor: gshare counter bits: %i\n", globalCtrBits);
-
-    DPRINTF(Fetch, "Branch predictor: gshare history bits: %i\n", globalHistoryLen);
-
-    DPRINTF(Fetch, "Branch predictor: gshare num sets: %d\n",globalPredictorSets);
-
-    DPRINTF(Fetch, "Branch predictor: gshare index mask: %#x\n", indexMask);
-
-    DPRINTF(Fetch, "Branch predictor: history mask: %#x\n", globalHistoryMask);
+    theta = _theta;
+	        
 }
 
 void
-GshareBP::reset()
+HybridpgBP::reset()
 {
-    for (unsigned i = 0; i < globalPredictorSets; ++i) {
-        globalCtrs[i].reset();
-    }
+
 }
 
 void
-GshareBP::BTBUpdate(Addr &branch_addr, void * &bp_history)
+HybridpgBP::BTBUpdate(Addr &branch_addr, void * &bp_history)
 {
 // Called to update predictor history when
 // a BTB entry is invalid or not found.
@@ -102,44 +94,25 @@ GshareBP::BTBUpdate(Addr &branch_addr, void * &bp_history)
 
 
 bool
-GshareBP::lookup(Addr &branch_addr, void * &bp_history)
+HybridpgBP::lookup(Addr &branch_addr, void * &bp_history)
 {
     bool taken;
-    uint8_t counter_val;
     //idx is xor of branch addr and globalHistory
     unsigned global_predictor_idx = getGlobalIndex(branch_addr);
-
-    DPRINTF(Fetch, "IDX: %d SETS: %d\n",global_predictor_idx, this->globalPredictorSets);
+	  PerceptronBP* curr_perceptron = this->perceptronTable[ getGlobalIndex(branch_addr)];
+	  BPHistory *history = new BPHistory;
+	  history->perceptron_y = curr_perceptron->getPrediction(this->X);
+	  bp_history = static_cast<void *>(history);
+  
     assert (global_predictor_idx < this->globalPredictorSets);
 
-    DPRINTF(Fetch, "Branch predictor: Looking up index %#x\n",
-            global_predictor_idx);
-
-    counter_val = globalCtrs[global_predictor_idx].read();
-
-    DPRINTF(Fetch, "Branch predictor: prediction is %i.\n",
-            (int)counter_val);
-
-    taken = getPrediction(counter_val);
-
-#if 0
-    // Speculative update.
-    if (taken) {
-        DPRINTF(Fetch, "Branch predictor: Branch updated as taken.\n");
-        globalCtrs[global_predictor_idx].increment();
-    } else {
-        DPRINTF(Fetch, "Branch predictor: Branch updated as not taken.\n");
-        globalCtrs[global_predictor_idx].decrement();
-    }
-#endif
-
+    taken = (history->perceptron_y) > 0;
     return taken;
 }
 
 void
-GshareBP::update(Addr &branch_addr, bool taken, void *bp_history)
+HybridpgBP::update(Addr &branch_addr, bool taken, void *bp_history)
 {
-    assert(bp_history == NULL);
     unsigned global_predictor_idx;
 
     // Update the global predictor.
@@ -150,35 +123,46 @@ GshareBP::update(Addr &branch_addr, bool taken, void *bp_history)
 
     DPRINTF(Fetch, "Branch predictor: Looking up index %#x\n",
             global_predictor_idx);
-
-    if (taken) {
-        DPRINTF(Fetch, "Branch predictor: Branch updated as taken.\n");
-        globalCtrs[global_predictor_idx].increment();
-    } else {
-        DPRINTF(Fetch, "Branch predictor: Branch updated as not taken.\n");
-        globalCtrs[global_predictor_idx].decrement();
-    }
-
-    //update global history
+  if (bp_history){
+    PerceptronBP* curr_perceptron = this->perceptronTable[global_predictor_idx];
+    this->X.insert(this->X.begin() + 1, this->changeToPlusMinusOne((int32_t)taken));
+    this->X.pop_back();
     if(taken)
       globalHistory = (globalHistory << 1) | 1;
     else
       globalHistory = globalHistory << 1;
+    curr_perceptron->train(this->changeToPlusMinusOne((int32_t)taken), static_cast<BPHistory *>(bp_history)->perceptron_y, this->theta, this->X);
 
     globalHistory = globalHistory & globalHistoryMask;
-}
-
-inline
-bool
-GshareBP::getPrediction(uint8_t &count)
-{
-    // Get the MSB of the count
-    return (count >> (globalCtrBits - 1));
+  }
 }
 
 inline
 unsigned
-GshareBP::getGlobalIndex(Addr &branch_addr)
+HybridpgBP::getGlobalIndex(Addr &branch_addr)
 {
     return ((branch_addr ^ (globalHistory & globalHistoryMask)) & indexMask);
+}
+
+void 
+HybridpgBP::uncondBr(void * &bp_history)
+{
+    BPHistory *history = new BPHistory;
+    history->perceptron_y = 1; //anything greater than 0 is taken
+	  bp_history = static_cast<void *>(history);
+}
+
+inline int8_t
+HybridpgBP::changeToPlusMinusOne(int32_t input)
+{
+  return (input > 0) ? 1 : -1;
+}
+
+void
+HybridpgBP::squash(void *bp_history)
+{
+    BPHistory *history = static_cast<BPHistory *>(bp_history);
+
+    // Delete this BPHistory now that we're done with it.
+    delete history;
 }

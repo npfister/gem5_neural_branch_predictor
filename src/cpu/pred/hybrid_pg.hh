@@ -1,14 +1,13 @@
 /*
-* Authors: Alex Ionescu, Nick Pfister
-*/
+ * Authors: John Skubic
+ */
 
-#ifndef __CPU_O3_PERCEPTRON_TOP_PRED_HH__
-#define __CPU_O3_PERCEPTRON_TOP_PRED_HH__
+#ifndef __CPU_O3_HYBRID_PG_PRED_HH__
+#define __CPU_O3_HYBRID_PG_PRED_HH__
 
 #include <vector>
 
 #include "base/types.hh"
-#include "cpu/o3/sat_counter.hh"
 #include "cpu/pred/perceptron.hh"
 
 /**
@@ -18,15 +17,16 @@
  * predictor state that needs to be recorded or updated; the update can be
  * determined solely by the branch being taken or not taken.
  */
-class PerceptronBP_Top
+class HybridpgBP
 {
   public:
     /**
      * Default branch predictor constructor.
-     * @param globalPredictorSize number of perceptrons.
-     * @param globalHistBits Number of bits in global history register.
+     * @param globalPredictorSize Size of the global predictor.
+     * @param globalCtrBits Number of bits per counter.
+     * @param instShiftAmt Offset amount for instructions to ignore alignment.
      */
-    PerceptronBP_Top(unsigned globalPredictorSize, unsigned globalHistBits, int32_t theta);
+    HybridpgBP(unsigned globalPredictorSize, unsigned globalHistoryLen, int32_t theta);
 
     /**
      * Looks up the given address in the branch predictor and returns
@@ -34,7 +34,7 @@ class PerceptronBP_Top
      * @param branch_addr The address of the branch to look up.
      * @param bp_history Pointer to any bp history state.
      * @return Whether or not the branch is taken.
-     */                             //NULL
+     */
     bool lookup(Addr &branch_addr, void * &bp_history);
 
     /**
@@ -53,14 +53,19 @@ class PerceptronBP_Top
      */
     void update(Addr &branch_addr, bool taken, void *bp_history);
 
-    void uncondBr(void * &bp_history);
-
     void squash(void *bp_history);
-
     void reset();
+    void uncondBr(void * &bp_history);
+    inline int8_t changeToPlusMinusOne(int32_t input);
 
   private:
-    inline int8_t changeToPlusMinusOne(int32_t input);
+    /**
+     *  Returns the taken/not taken prediction given the value of the
+     *  counter.
+     *  @param count The value of the counter.
+     *  @return The prediction based on the counter value.
+     */
+    inline bool getPrediction(uint8_t &count);
 
     /** Calculates the global index based on the PC. */
     inline unsigned getGlobalIndex(Addr &PC);
@@ -71,24 +76,30 @@ class PerceptronBP_Top
     /** Size of the global predictor. */
     unsigned globalPredictorSize;
 
+    /** Number of sets. */
+    unsigned globalPredictorSets;
+
     /** Number of bits of the global predictor's counters. */
-    unsigned globalHistBits;
+    unsigned globalCtrBits;
 
     /** Mask to get the proper global history. */
-    unsigned long globalHistoryMask;
+    unsigned globalHistoryMask;
 
     /** Global history register. */
-    std::vector<int8_t> X;
+    unsigned globalHistory;    
 
-    /** Training constraint */
-    int8_t theta;
+    unsigned globalHistoryLen;
 
-    long long int missCount;
+    unsigned indexMask;
 
-    struct BPHistory {
+    unsigned theta;
+    /** Global history register. */
+    std::vector<int8_t> X;   
+
+   struct BPHistory {
         int32_t perceptron_y;
 	};
 
 };
 
-#endif
+#endif // __CPU_O3_HYBRID_PG_PRED_HH__
