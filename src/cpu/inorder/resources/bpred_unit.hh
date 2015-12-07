@@ -252,7 +252,7 @@ class BPredUnit
     PerceptronBP_Top *perceptronBP;
 
     /** The hybrid gshare / perceptron branch predictor. */
-    HybridpgBP *hybridpgBP;
+    HybridpgBP *hybridBP;
 
     /** The BTB. */
     DefaultBTB BTB;

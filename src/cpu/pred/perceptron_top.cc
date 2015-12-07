@@ -13,7 +13,7 @@ PerceptronBP_Top::PerceptronBP_Top(unsigned globalPredictorSize, unsigned global
 {
 
   DPRINTF(Perceptron, "BP_Top Constructor Start %d %d %d\n", globalPredictorSize, globalHistBits, theta);
-	this->globalPredictorSize = globalPredictorSize;
+	this->globalPredictorSize = floorPow2(globalPredictorSize/(globalHistBits * ceilLog2(theta)));
 	this->globalHistBits = globalHistBits;
 
 	if (!isPowerOf2(globalPredictorSize)) {
@@ -70,9 +70,10 @@ PerceptronBP_Top::update(Addr &branch_addr, bool taken, void *bp_history)
   if (bp_history){
     //PerceptronBP* curr_perceptron = this->perceptronTable[ (branch_addr >> 2) & this->globalHistoryMask];
     PerceptronBP* curr_perceptron = this->perceptronTable[ (branch_addr >> 2) & (this->globalPredictorSize - 1)];
-    curr_perceptron->train(this->changeToPlusMinusOne((int32_t)taken), static_cast<BPHistory *>(bp_history)->perceptron_y, this->theta, this->X);
     this->X.insert(this->X.begin() + 1, this->changeToPlusMinusOne((int32_t)taken));
     this->X.pop_back();
+    curr_perceptron->train(this->changeToPlusMinusOne((int32_t)taken), static_cast<BPHistory *>(bp_history)->perceptron_y, this->theta, this->X);
+    
     DPRINTF(Perceptron, "BP_Top update after train %d\n", curr_perceptron->getPrediction(this->X)); //static_cast<BPHistory *>(bp_history)->perceptron_y);
     DPRINTF(Perceptron, "BP_Top update taken %d\n", taken);
     DPRINTF(Perceptron, "BP_Top update branch_addr %x\n", branch_addr);

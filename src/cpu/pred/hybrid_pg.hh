@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "base/types.hh"
-#include "cpu/o3/sat_counter.hh"
+#include "cpu/pred/perceptron.hh"
 
 /**
  * Implements a global predictor that uses the PC to index into a table of
@@ -26,7 +26,7 @@ class HybridpgBP
      * @param globalCtrBits Number of bits per counter.
      * @param instShiftAmt Offset amount for instructions to ignore alignment.
      */
-    HybridpgBP(unsigned globalPredictorSize, unsigned globalCtrBits);
+    HybridpgBP(unsigned globalPredictorSize, unsigned globalHistoryLen, int32_t theta);
 
     /**
      * Looks up the given address in the branch predictor and returns
@@ -53,10 +53,10 @@ class HybridpgBP
      */
     void update(Addr &branch_addr, bool taken, void *bp_history);
 
-    void squash(void *bp_history)
-    { assert(bp_history == NULL); }
-
+    void squash(void *bp_history);
     void reset();
+    void uncondBr(void * &bp_history);
+    inline int8_t changeToPlusMinusOne(int32_t input);
 
   private:
     /**
@@ -71,7 +71,7 @@ class HybridpgBP
     inline unsigned getGlobalIndex(Addr &PC);
 
     /** Array of counters that make up the global predictor. */
-    std::vector<SatCounter> globalCtrs;
+    std::vector<PerceptronBP*> perceptronTable;
 
     /** Size of the global predictor. */
     unsigned globalPredictorSize;
@@ -88,7 +88,18 @@ class HybridpgBP
     /** Global history register. */
     unsigned globalHistory;    
 
+    unsigned globalHistoryLen;
+
+    unsigned indexMask;
+
+    unsigned theta;
+    /** Global history register. */
+    std::vector<int8_t> X;   
+
+   struct BPHistory {
+        int32_t perceptron_y;
+	};
 
 };
 
-#endif // __CPU_O3_GSHARE_PRED_HH__
+#endif // __CPU_O3_HYBRID_PG_PRED_HH__

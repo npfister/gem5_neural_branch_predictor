@@ -306,6 +306,10 @@ def run(options, root, testsys, cpu_class):
     if options.global_pred_size:
         for i in xrange(np):
             testsys.cpu[i].globalPredictorSize = options.global_pred_size
+    
+    if options.local_pred_size:
+        for i in xrange(np):
+            testsys.cpu[i].localPredictorSize = options.local_pred_size
 
     if cpu_class:
         switch_cpus = [cpu_class(defer_registration=True, cpu_id=(i))

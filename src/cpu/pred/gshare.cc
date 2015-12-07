@@ -35,9 +35,11 @@
 #include "debug/Fetch.hh"
 
 GshareBP::GshareBP(unsigned _globalPredictorSize,
-                 unsigned _globalCtrBits)
+                  unsigned _globalCtrBits,
+                  unsigned _globalHistoryLen)
     : globalPredictorSize(_globalPredictorSize),
-      globalCtrBits(_globalCtrBits)
+      globalCtrBits(_globalCtrBits),
+      globalHistoryLen(_globalHistoryLen)
 {
     if (!isPowerOf2(globalPredictorSize)) {
         fatal("Invalid global predictor size!\n");
@@ -53,9 +55,13 @@ GshareBP::GshareBP(unsigned _globalPredictorSize,
     globalHistory = 0;
   
     //set up the global history mask
-    globalHistoryMask = (1 << globalPredictorSets) - 1;
+    globalHistoryMask = 0;
+    for(int i=0;i<globalHistoryLen;i++){
+      globalHistoryMask = (globalHistoryMask << 1) | 1;
+    }
 
-    DPRINTF(Fetch, "Branch predictor: history mask: %#x\n", globalHistoryMask);
+    indexMask = globalPredictorSets-1;
+
 
     // Setup the array of counters for the global predictor.
     globalCtrs.resize(globalPredictorSets);
@@ -68,6 +74,13 @@ GshareBP::GshareBP(unsigned _globalPredictorSize,
 
     DPRINTF(Fetch, "Branch predictor: gshare counter bits: %i\n", globalCtrBits);
 
+    DPRINTF(Fetch, "Branch predictor: gshare history bits: %i\n", globalHistoryLen);
+
+    DPRINTF(Fetch, "Branch predictor: gshare num sets: %d\n",globalPredictorSets);
+
+    DPRINTF(Fetch, "Branch predictor: gshare index mask: %#x\n", indexMask);
+
+    DPRINTF(Fetch, "Branch predictor: history mask: %#x\n", globalHistoryMask);
 }
 
 void
@@ -95,6 +108,9 @@ GshareBP::lookup(Addr &branch_addr, void * &bp_history)
     uint8_t counter_val;
     //idx is xor of branch addr and globalHistory
     unsigned global_predictor_idx = getGlobalIndex(branch_addr);
+
+    DPRINTF(Fetch, "IDX: %d SETS: %d\n",global_predictor_idx, this->globalPredictorSets);
+    assert (global_predictor_idx < this->globalPredictorSets);
 
     DPRINTF(Fetch, "Branch predictor: Looking up index %#x\n",
             global_predictor_idx);
@@ -129,6 +145,9 @@ GshareBP::update(Addr &branch_addr, bool taken, void *bp_history)
     // Update the global predictor.
     global_predictor_idx = getGlobalIndex(branch_addr);
 
+    DPRINTF(Fetch, "IDX: %d SETS: %d\n",global_predictor_idx, this->globalPredictorSets);
+    assert (global_predictor_idx < this->globalPredictorSets);
+
     DPRINTF(Fetch, "Branch predictor: Looking up index %#x\n",
             global_predictor_idx);
 
@@ -161,5 +180,5 @@ inline
 unsigned
 GshareBP::getGlobalIndex(Addr &branch_addr)
 {
-    return ((branch_addr ^ globalHistory) & globalHistoryMask);
+    return ((branch_addr ^ (globalHistory & globalHistoryMask)) & indexMask);
 }

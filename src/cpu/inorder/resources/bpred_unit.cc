@@ -66,11 +66,13 @@ BPredUnit::BPredUnit(Resource *_res, ThePipeline::Params *params)
         predictor = Tournament;
     } else if (params->predType == "gshare") {
       gshareBP = new GshareBP(params->globalPredictorSize,
-                              params->globalCtrBits);
+                              params->globalCtrBits,
+                              params->globalHistoryBits);
         predictor = Gshare;
     } else if (params->predType == "hybridpg"){
-      hybridpgBP = new HybridpgBP(params->globalPredictorSize,
-                                  params->globalCtrBits);
+      hybridBP = new HybridpgBP(params->globalPredictorSize,
+                                  params->globalHistoryBits,
+				                          2 * params->globalHistoryBits + 14);
       predictor = HybridPG;
     } else if (params->predType == "perceptron") {
       perceptronBP = new PerceptronBP_Top(params->globalPredictorSize,
@@ -425,7 +427,7 @@ BPredUnit::BPSquash(void *bp_history)
     } else if (predictor == Gshare) {
         gshareBP->squash(bp_history);
     } else if (predictor == HybridPG) {
-        hybridpgBP->squash(bp_history);
+        hybridBP->squash(bp_history);
     } else if (predictor == Perceptron) {
         perceptronBP->squash(bp_history);
     } else {
@@ -444,7 +446,7 @@ BPredUnit::BPLookup(Addr inst_PC, void * &bp_history)
     } else if (predictor == Gshare) {
         return gshareBP->lookup(inst_PC, bp_history);
     } else if (predictor == HybridPG) {
-        return hybridpgBP->lookup(inst_PC, bp_history);
+        return hybridBP->lookup(inst_PC, bp_history);
     } else if (predictor == Perceptron) {
         return perceptronBP->lookup(inst_PC, bp_history);
     } else {
@@ -463,7 +465,7 @@ BPredUnit::BPUpdate(Addr inst_PC, bool taken, void *bp_history, bool squashed)
     } else if (predictor == Gshare) {
         gshareBP->update(inst_PC, taken, bp_history);
     } else if (predictor == HybridPG) {
-        hybridpgBP->lookup(inst_PC, bp_history);
+        hybridBP->lookup(inst_PC, bp_history);
     } else if (predictor == Perceptron) {
         perceptronBP->update(inst_PC, taken, bp_history);
     } else {

@@ -23,7 +23,17 @@ int32_t
 PerceptronBP::getPrediction(std::vector<int8_t>& X)
 {
     /* TODO - this function may require X as an input, depending on how the history register is handled*/
-    return std::inner_product(X.begin(), X.end(), this->W.begin(), 0); 
+    int32_t innerProdManual = 0;
+    int32_t innerProdStd =  std::inner_product(X.begin(), X.end(), this->W.begin(), 0);
+
+    for(int i=0;i < X.size();i++){
+      innerProdManual += X[i] * this->W[i];
+    }
+
+    assert(innerProdStd == innerProdManual);
+    assert(X.size() == this->W.size());
+    return innerProdStd;
+  
 }
 
 void
@@ -45,15 +55,15 @@ PerceptronBP::train(int8_t branch_outcome, int32_t perceptron_output, int32_t tr
     DPRINTF(Perceptron, "Perceptron train entered\n");
     if (this->changeToPlusMinusOne(perceptron_output) != branch_outcome || abs(perceptron_output)<=training_threshold) {//incorrect perceptron prediction. Upgrade the perceptron predictor
         for(int i=0; i< this->W.size(); i++) {
-            W[i]= W[i]+ (this->changeToPlusMinusOne(perceptron_output)) * X[i]; //Increase or decrease weight vectors
-           /* if(abs(W[i]) > this->theta){
+            W[i]= W[i]+ branch_outcome * X[i]; //Increase or decrease weight vectors
+            if(abs(W[i]) > this->theta){
               if (W[i] < 0){
                 W[i] = theta * -1;
               }
               else{
                 W[i] = theta;
               }
-            }*/
+            }
             s.append(std::to_string((long long int)W[i]));
             s.append(", ");
         }
