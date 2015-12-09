@@ -107,7 +107,11 @@ GshareBP::lookup(Addr &branch_addr, void * &bp_history)
     bool taken;
     uint8_t counter_val;
     //idx is xor of branch addr and globalHistory
-    unsigned global_predictor_idx = getGlobalIndex(branch_addr);
+    unsigned global_predictor_idx = getGlobalIndex(branch_addr, globalHistory);
+    
+    BPHistory *history = new BPHistory;
+    history->globalHistory = globalHistory;
+    bp_history = static_cast<void *>(history);
 
     DPRINTF(Fetch, "IDX: %d SETS: %d\n",global_predictor_idx, this->globalPredictorSets);
     assert (global_predictor_idx < this->globalPredictorSets);
@@ -139,33 +143,38 @@ GshareBP::lookup(Addr &branch_addr, void * &bp_history)
 void
 GshareBP::update(Addr &branch_addr, bool taken, void *bp_history)
 {
-    assert(bp_history == NULL);
     unsigned global_predictor_idx;
+    BPHistory *history;
 
     // Update the global predictor.
-    global_predictor_idx = getGlobalIndex(branch_addr);
+    if (bp_history){
+      history = static_cast<BPHistory *>(bp_history);
 
-    DPRINTF(Fetch, "IDX: %d SETS: %d\n",global_predictor_idx, this->globalPredictorSets);
-    assert (global_predictor_idx < this->globalPredictorSets);
+      global_predictor_idx = getGlobalIndex(branch_addr, history->globalHistory);
 
-    DPRINTF(Fetch, "Branch predictor: Looking up index %#x\n",
-            global_predictor_idx);
+      DPRINTF(Fetch, "IDX: %d SETS: %d\n",global_predictor_idx, this->globalPredictorSets);
+      assert (global_predictor_idx < this->globalPredictorSets);
 
-    if (taken) {
-        DPRINTF(Fetch, "Branch predictor: Branch updated as taken.\n");
-        globalCtrs[global_predictor_idx].increment();
-    } else {
-        DPRINTF(Fetch, "Branch predictor: Branch updated as not taken.\n");
-        globalCtrs[global_predictor_idx].decrement();
+      DPRINTF(Fetch, "Branch predictor: Looking up index %#x\n",
+              global_predictor_idx);
+
+      if (taken) {
+          DPRINTF(Fetch, "Branch predictor: Branch updated as taken.\n");
+          globalCtrs[global_predictor_idx].increment();
+      } else {
+          DPRINTF(Fetch, "Branch predictor: Branch updated as not taken.\n");
+          globalCtrs[global_predictor_idx].decrement();
+      }
+
+      //update global history
+      if(taken)
+        globalHistory = (globalHistory << 1) | 1;
+      else
+        globalHistory = globalHistory << 1;
+
+      globalHistory = globalHistory & globalHistoryMask;
+      delete history;
     }
-
-    //update global history
-    if(taken)
-      globalHistory = (globalHistory << 1) | 1;
-    else
-      globalHistory = globalHistory << 1;
-
-    globalHistory = globalHistory & globalHistoryMask;
 }
 
 inline
@@ -178,7 +187,22 @@ GshareBP::getPrediction(uint8_t &count)
 
 inline
 unsigned
-GshareBP::getGlobalIndex(Addr &branch_addr)
+GshareBP::getGlobalIndex(Addr &branch_addr, unsigned history)
 {
-    return ((branch_addr ^ (globalHistory & globalHistoryMask)) & indexMask);
+    return ((branch_addr ^ (history & globalHistoryMask)) & indexMask);
+}
+
+void
+GshareBP::uncondBr(void * &bp_history)
+{
+    BPHistory *history = new BPHistory;
+    history->globalHistory = globalHistory;
+    bp_history = static_cast<void *>(history);
+}
+
+void 
+GshareBP::squash(void *bp_history)
+{
+    BPHistory *history = static_cast<BPHistory *>(bp_history);
+    delete history;
 }

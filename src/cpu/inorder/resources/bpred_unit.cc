@@ -412,8 +412,12 @@ BPredUnit::BPUncond(void * &bp_history)
         tournamentBP->uncondBr(bp_history);
     } else if (predictor == Perceptron) {
         perceptronBP->uncondBr(bp_history);
-    }
-       
+    } else if (predictor == Gshare) {
+        gshareBP->uncondBr(bp_history);
+    } else if (predictor == HybridPG) {
+        hybridBP->uncondBr(bp_history);
+    } 
+    
 }
 
 
@@ -439,6 +443,7 @@ BPredUnit::BPSquash(void *bp_history)
 bool
 BPredUnit::BPLookup(Addr inst_PC, void * &bp_history)
 {
+    
     if (predictor == Local) {
         return localBP->lookup(inst_PC, bp_history);
     } else if (predictor == Tournament) {
@@ -458,6 +463,7 @@ BPredUnit::BPLookup(Addr inst_PC, void * &bp_history)
 void
 BPredUnit::BPUpdate(Addr inst_PC, bool taken, void *bp_history, bool squashed)
 {
+
     if (predictor == Local) {
         localBP->update(inst_PC, taken, bp_history);
     } else if (predictor == Tournament) {
@@ -465,12 +471,11 @@ BPredUnit::BPUpdate(Addr inst_PC, bool taken, void *bp_history, bool squashed)
     } else if (predictor == Gshare) {
         gshareBP->update(inst_PC, taken, bp_history);
     } else if (predictor == HybridPG) {
-        hybridBP->lookup(inst_PC, bp_history);
+        hybridBP->update(inst_PC, taken, bp_history);
     } else if (predictor == Perceptron) {
         perceptronBP->update(inst_PC, taken, bp_history);
     } else {
         panic("Predictor type is unexpected value!");
-        //cout << "Got predictor: " << predictor << " Gshare is " << Gshare << "\n";
     }
 }
 

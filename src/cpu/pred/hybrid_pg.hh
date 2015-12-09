@@ -58,7 +58,7 @@ class HybridpgBP
     void uncondBr(void * &bp_history);
     inline int8_t changeToPlusMinusOne(int32_t input);
 
-  private:
+   private:
     /**
      *  Returns the taken/not taken prediction given the value of the
      *  counter.
@@ -68,7 +68,7 @@ class HybridpgBP
     inline bool getPrediction(uint8_t &count);
 
     /** Calculates the global index based on the PC. */
-    inline unsigned getGlobalIndex(Addr &PC);
+    inline unsigned getGlobalIndex(Addr &PC, unsigned history);
 
     /** Array of counters that make up the global predictor. */
     std::vector<PerceptronBP*> perceptronTable;
@@ -98,8 +98,9 @@ class HybridpgBP
 
    struct BPHistory {
         int32_t perceptron_y;
-	};
-
+	      unsigned globalHistory;
+        std::vector<int8_t> X;
+	  };
 };
 
 #endif // __CPU_O3_HYBRID_PG_PRED_HH__

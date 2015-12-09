@@ -53,11 +53,11 @@ class GshareBP
      */
     void update(Addr &branch_addr, bool taken, void *bp_history);
 
-    void squash(void *bp_history)
-    { assert(bp_history == NULL); }
+    void squash(void *bp_history);
 
     void reset();
 
+    void uncondBr(void * &bp_history);
   private:
     /**
      *  Returns the taken/not taken prediction given the value of the
@@ -68,7 +68,7 @@ class GshareBP
     inline bool getPrediction(uint8_t &count);
 
     /** Calculates the global index based on the PC. */
-    inline unsigned getGlobalIndex(Addr &PC);
+    inline unsigned getGlobalIndex(Addr &PC, unsigned history);
 
     /** Array of counters that make up the global predictor. */
     std::vector<SatCounter> globalCtrs;
@@ -91,6 +91,10 @@ class GshareBP
     unsigned globalHistoryLen;
 
     unsigned indexMask;
+   
+    struct BPHistory {
+	    unsigned globalHistory;
+	  };
 
 };
 

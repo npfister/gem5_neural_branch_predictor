@@ -87,6 +87,7 @@ class PerceptronBP_Top
 
     struct BPHistory {
         int32_t perceptron_y;
+	std::vector<int8_t>X;
 	};
 
 };
