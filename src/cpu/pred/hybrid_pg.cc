@@ -74,7 +74,8 @@ HybridpgBP::HybridpgBP(unsigned _globalPredictorSize,
       this->perceptronTable.push_back(new PerceptronBP(_globalHistoryLen, theta));
 
     theta = _theta;
-	        
+	   
+    DPRINTF(Fetch, "Hybrid Predictor:\nSize: %d\nHistoryLen: %d\nHistoryMask %x\nIdxMask %x\nglobalPredictorSets: %d\ntheta %d\n\n", globalPredictorSize, globalHistoryLen, globalHistoryMask, indexMask, globalPredictorSets, theta);
 }
 
 void
@@ -97,15 +98,20 @@ bool
 HybridpgBP::lookup(Addr &branch_addr, void * &bp_history)
 {
     bool taken;
+    unsigned global_predictor_idx;
+
     //idx is xor of branch addr and globalHistory
-	  PerceptronBP* curr_perceptron = this->perceptronTable[ getGlobalIndex(branch_addr)];
+    global_predictor_idx = getGlobalIndex(branch_addr, globalHistory);
+
+    DPRINTF(Fetch, "LOOKUP: idx %x addr %x history %x\n", global_predictor_idx, branch_addr, globalHistory);
+
+	  PerceptronBP* curr_perceptron = this->perceptronTable[global_predictor_idx];
 	  BPHistory *history = new BPHistory;
 	  history->perceptron_y = curr_perceptron->getPrediction(this->X);
+    history->globalHistory = globalHistory;
+    history->X = X;
 	  bp_history = static_cast<void *>(history);
-  
-    assert (global_predictor_idx < this->globalPredictorSets);
-
-    taken = (history->perceptron_y) > 0;
+    taken = (history->perceptron_y) >= 0;
     return taken;
 }
 
@@ -113,34 +119,39 @@ void
 HybridpgBP::update(Addr &branch_addr, bool taken, void *bp_history)
 {
     unsigned global_predictor_idx;
-
+    BPHistory *history;
     // Update the global predictor.
-    global_predictor_idx = getGlobalIndex(branch_addr);
+    
+    DPRINTF(Fetch, "Entering Hybrid Update\n");
 
-    DPRINTF(Fetch, "IDX: %d SETS: %d\n",global_predictor_idx, this->globalPredictorSets);
-    assert (global_predictor_idx < this->globalPredictorSets);
-
-    DPRINTF(Fetch, "Branch predictor: Looking up index %#x\n",
-            global_predictor_idx);
   if (bp_history){
+
+    //train the same perceptron that made the prediction
+    history = static_cast<BPHistory *>(bp_history);
+    global_predictor_idx = getGlobalIndex(branch_addr,history->globalHistory);
+
+    DPRINTF(Fetch, "UPDATE: idx %x addr %x history %x\n", global_predictor_idx, branch_addr, history->globalHistory);
+ 
     PerceptronBP* curr_perceptron = this->perceptronTable[global_predictor_idx];
+    curr_perceptron->train(this->changeToPlusMinusOne((int32_t)taken), history->perceptron_y, this->theta, history->X);
     this->X.insert(this->X.begin() + 1, this->changeToPlusMinusOne((int32_t)taken));
     this->X.pop_back();
+
     if(taken)
       globalHistory = (globalHistory << 1) | 1;
     else
       globalHistory = globalHistory << 1;
-    curr_perceptron->train(this->changeToPlusMinusOne((int32_t)taken), static_cast<BPHistory *>(bp_history)->perceptron_y, this->theta, this->X);
 
     globalHistory = globalHistory & globalHistoryMask;
+    delete history;
   }
 }
 
 inline
 unsigned
-HybridpgBP::getGlobalIndex(Addr &branch_addr)
+HybridpgBP::getGlobalIndex(Addr &branch_addr, unsigned history)
 {
-    return ((branch_addr ^ (globalHistory & globalHistoryMask)) & indexMask);
+    return ((branch_addr ^ (history & globalHistoryMask)) & indexMask);
 }
 
 void 
@@ -148,7 +159,9 @@ HybridpgBP::uncondBr(void * &bp_history)
 {
     BPHistory *history = new BPHistory;
     history->perceptron_y = 1; //anything greater than 0 is taken
-	  bp_history = static_cast<void *>(history);
+    history->globalHistory = globalHistory;
+    history->X = X;
+   	bp_history = static_cast<void *>(history);
 }
 
 inline int8_t
