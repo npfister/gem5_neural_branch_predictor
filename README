@@ -1,3 +1,12 @@
+
+This is the final project to purdue course ECE565. It is a functioning gem5 model of a neural-net based predictor
+used as a branch predictor for a model of a 5-stage sparc processor. The final benchmarking showed the neural-net
+branch predictor outperformed existing predictors in the model, especially for long running tasks,
+due to necessary training in a neuron based predictor.
+
+
+***********************************************************************************
+
 This is the gem5 simulator.
 
 For detailed information about building the simulator and getting
